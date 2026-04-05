@@ -1,0 +1,29 @@
+# Core ML/NLP
+torch>=2.2.0
+transformers>=4.41.0
+sentence-transformers>=2.7.0
+datasets>=2.20.0
+
+# Graph Engine
+networkx>=3.2.1
+
+# NLP Toolkit
+nltk>=3.8.0
+
+# Web Framework
+fastapi>=0.111.0
+uvicorn>=0.30.0
+pydantic>=2.7.0
+
+# HTTP Client
+requests>=2.31.0
+
+# Scientific Computing
+numpy>=1.26.0
+scikit-learn>=1.4.0
+
+# System Monitoring
+psutil>=5.9.0
+
+# Visualization (evaluation pipeline)
+matplotlib>=3.8.0

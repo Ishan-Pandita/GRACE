@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Prompt Compression System</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Vis.js for Graph rendering -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <!-- Styling -->
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --secondary: #10b981;
+            --secondary-glow: rgba(16, 185, 129, 0.5);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --user-msg: linear-gradient(135deg, #3b82f6, #2563eb);
+            --bot-msg: linear-gradient(135deg, #1e293b, #0f172a);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.15), transparent 25%);
+        }
+
+        /* Glassmorphism Panel */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Layout */
+        #app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Chat Section */
+        #chat-section {
+            display: flex;
+            flex-direction: column;
+            width: 400px;
+            height: 100%;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 20px;
+            border-bottom: 1px solid var(--glass-border);
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            background: linear-gradient(to right, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        #chat-window {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            animation: fadeIn 0.3s ease;
+            position: relative;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: var(--user-msg);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .message.bot {
+            align-self: flex-start;
+            background: var(--bot-msg);
+            border: 1px solid var(--glass-border);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-stats {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            text-align: right;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #input-area {
+            padding: 15px;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 12px 16px;
+            border-radius: 20px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+
+        button {
+            background: var(--user-msg);
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Graph Section */
+        #graph-section {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #network-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+            outline: none;
+        }
+
+        .graph-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .graph-stats {
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .graph-stats span {
+            color: white;
+            font-weight: 600;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            font-size: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        /* Typing indicator */
+        .typing {
+            display: flex;
+            gap: 5px;
+            padding: 12px 16px;
+            background: var(--bot-msg);
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            align-self: flex-start;
+            border: 1px solid var(--glass-border);
+            width: auto;
+        }
+        .typing .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing .dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <!-- Chat Panel -->
+        <div id="chat-section" class="glass-panel">
+            <div class="header">
+                <h1>compression.ai</h1>
+                <p>Ollama Causal Knowledge Graph</p>
+            </div>
+            
+            <div id="chat-window">
+                <div class="message bot">
+                    Hello! I'm your mobile-optimized prompt compression agent. Ask me a question, and watch me build a causal knowledge graph on the right! 🚀
+                </div>
+            </div>
+
+            <div id="input-area">
+                <input type="text" id="user-input" placeholder="Type a message..." autocomplete="off">
+                <button id="send-btn">Send</button>
+            </div>
+        </div>
+
+        <!-- Graph Panel -->
+        <div id="graph-section" class="glass-panel">
+            <div class="graph-overlay">
+                <div class="graph-stats">
+                    Total Nodes: <span id="stat-nodes">0</span> &nbsp;|&nbsp; 
+                    Edges: <span id="stat-edges">0</span>
+                </div>
+            </div>
+            <div id="network-container"></div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="color-box" style="background:#3b82f6;"></div> Question Node</div>
+                <div class="legend-item"><div class="color-box" style="background:#10b981;"></div> Response Node</div>
+                <div class="legend-item"><div class="color-box" style="background:#ef4444; height: 3px;"></div> Causal Edge</div>
+                <div class="legend-item"><div class="color-box" style="background:#8b5cf6; height: 3px;"></div> Temporal Edge</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Vis.js Graph Setup
+        const container = document.getElementById('network-container');
+        const defaultNodes = new vis.DataSet([]);
+        const defaultEdges = new vis.DataSet([]);
+        let network;
+
+        const options = {
+            nodes: {
+                shape: 'dot',
+                size: 20,
+                font: {
+                    color: '#f8fafc',
+                    face: 'Inter',
+                    size: 13,
+                    background: 'rgba(15, 23, 42, 0.7)'
+                },
+                borderWidth: 2,
+                shadow: {
+                    enabled: true,
+                    color: 'rgba(0,0,0,0.5)',
+                    size: 10,
+                    x: 2,
+                    y: 2
+                }
+            },
+            edges: {
+                width: 2,
+                font: {
+                    color: '#cbd5e1',
+                    size: 10,
+                    face: 'Inter',
+                    background: 'rgba(15, 23, 42, 0.8)'
+                },
+                smooth: { type: 'continuous' },
+                arrows: { to: { enabled: true, scaleFactor: 0.5 } }
+            },
+            physics: {
+                barnesHut: {
+                    gravitationalConstant: -3000,
+                    centralGravity: 0.3,
+                    springLength: 200,
+                    springConstant: 0.04
+                },
+                stabilization: { iterations: 150 }
+            },
+            groups: {
+                question: {
+                    color: {
+                        background: '#1e3a8a',
+                        border: '#3b82f6',
+                        highlight: { background: '#2563eb', border: '#60a5fa' }
+                    }
+                },
+                response: {
+                    color: {
+                        background: '#064e3b',
+                        border: '#10b981',
+                        highlight: { background: '#059669', border: '#34d399' }
+                    }
+                }
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200
+            }
+        };
+
+        const data = { nodes: defaultNodes, edges: defaultEdges };
+        network = new vis.Network(container, data, options);
+
+        // Fetch initial graph state
+        fetch('/graph_state')
+            .then(r => r.json())
+            .then(state => updateGraphVis(state));
+
+        // UI Variables
+        const chatWindow = document.getElementById('chat-window');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const statNodes = document.getElementById('stat-nodes');
+        const statEdges = document.getElementById('stat-edges');
+
+        function appendMessage(text, sender, statsHtml = '') {
+            const msgObj = document.createElement('div');
+            msgObj.className = `message ${sender}`;
+            msgObj.innerText = text;
+            
+            if (statsHtml && sender === 'bot') {
+                const statsNode = document.createElement('div');
+                statsNode.className = 'message-stats';
+                statsNode.innerHTML = statsHtml;
+                msgObj.appendChild(statsNode);
+            }
+            
+            chatWindow.appendChild(msgObj);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            return msgObj;
+        }
+
+        function showTyping() {
+            const typing = document.createElement('div');
+            typing.className = 'typing';
+            typing.id = 'typing-indicator';
+            typing.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+            chatWindow.appendChild(typing);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function hideTyping() {
+            const el = document.getElementById('typing-indicator');
+            if(el) el.remove();
+        }
+
+        function updateGraphVis(graphData, questionId = null, responseId = null) {
+            // Reconcile nodes
+            const existingNodes = defaultNodes.getIds();
+            const newNodes = graphData.nodes.filter(n => !existingNodes.includes(n.id)).map(n => ({
+                id: n.id,
+                label: n.label,
+                title: n.full_text, 
+                group: n.group,
+            }));
+            
+            if (newNodes.length > 0) defaultNodes.add(newNodes);
+
+            // Reconcile edges
+            const newEdges = [];
+            graphData.edges.forEach(e => {
+                const edgeId = `${e.from}-${e.to}-${e.label}`;
+                if (!defaultEdges.get(edgeId)) {
+                    let color = '#94a3b8';
+                    let dashes = false;
+                    let displayLabel = e.label + ' (' + (e.confidence ? e.confidence.toFixed(2) : '1.0') + ')';
+
+                    if (e.label === 'causal') {
+                        color = '#ef4444'; // Red
+                    } else if (e.label === 'temporal') {
+                        color = '#8b5cf6'; // Purple
+                        dashes = true;
+                    } else if (e.label === 'question_response') {
+                        color = '#3b82f6'; // Blue
+                        displayLabel = ''; // hide label for main mapping to declutter
+                    }
+
+                    newEdges.push({
+                        id: edgeId,
+                        from: e.from,
+                        to: e.to,
+                        label: displayLabel,
+                        color: { color: color, highlight: color },
+                        dashes: dashes
+                    });
+                }
+            });
+
+            if (newEdges.length > 0) defaultEdges.add(newEdges);
+
+            // Update stats
+            statNodes.innerText = defaultNodes.length;
+            statEdges.innerText = defaultEdges.length;
+
+            // Highlight new additions (simulate BFS focus)
+            const highlightIds = [questionId, responseId].filter(Boolean);
+            if (highlightIds.length > 0) {
+                // Focus camera on new nodes
+                network.fit({ nodes: highlightIds, animation: true });
+                
+                // Temporarily emphasize them
+                highlightIds.forEach(id => {
+                    const original = defaultNodes.get(id);
+                    if(original) {
+                        try {
+                            defaultNodes.update({id: id, borderWidth: 5, color: { border: '#fbbf24' }}); // Amber border
+                            setTimeout(() => {
+                                defaultNodes.update({id: id, borderWidth: 2, color: { border: undefined }}); // restore default group coloring
+                            }, 5000); // 5 sec highlight
+                        } catch (e) {}
+                    }
+                });
+            }
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // Update UI
+            userInput.value = '';
+            userInput.disabled = true;
+            sendBtn.disabled = true;
+
+            appendMessage(text, 'user');
+            showTyping();
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                
+                const data = await response.json();
+                hideTyping();
+                
+                if (data.success) {
+                    const stats = `<div><span>BFS Matches: <b>${data.relevant_nodes_count}</b></span></div><div><span>Process Time: <b>${data.processing_time.toFixed(2)}s</b></span></div>`;
+                    appendMessage(data.response, 'bot', stats);
+                } else {
+                    appendMessage('Error: ' + data.error, 'bot');
+                }
+
+                if (data.graph) {
+                    updateGraphVis(data.graph, data.question_id, data.response_id);
+                }
+
+            } catch (err) {
+                hideTyping();
+                appendMessage('Failed to connect to backend server.', 'bot');
+            }
+
+            userInput.disabled = false;
+            sendBtn.disabled = false;
+            userInput.focus();
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>

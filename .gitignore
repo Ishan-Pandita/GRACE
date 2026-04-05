@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+
+# Model weights (use Git LFS or download on first run)
+custom_causal_model/*.safetensors
+custom_causal_model/checkpoint-*/
+
+# Graph outputs
+graphs/*.png
+graphs/*.graphml
+graphs/causal_temporal/
+graphs/evidence_graph/
+graphs/output/
+graphs/start_node/
+graphs/user_session/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# GSD Planning
+.planning/
