@@ -326,6 +326,6 @@ async def test_pipeline():
 
 if __name__ == "__main__":
     print("\n\n" + "="*50)
-    print("🚀 App starting at http://localhost:8000")
+    print("App starting at http://localhost:8000")
     print("="*50 + "\n\n")
     uvicorn.run(app, host="0.0.0.0", port=8000)

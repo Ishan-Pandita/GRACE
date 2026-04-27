@@ -33,7 +33,7 @@ class OllamaInterface:
                          max_tokens: int = 150) -> Dict[str, Any]:
         """Generate response from Ollama model."""
         start_time = time.time()
-        print(f"🔍 Ollama: Starting generation for {len(prompt)} chars, max_tokens={max_tokens}")
+        print(f"Ollama: Starting generation for {len(prompt)} chars, max_tokens={max_tokens}")
         
         payload = {
             "model": self.model_name,
@@ -61,7 +61,7 @@ class OllamaInterface:
                 end_time = time.time()
                 generation_time = end_time - start_time
                 
-                print(f"🔍 Ollama: Generation completed in {generation_time:.2f}s")
+                print(f"Ollama: Generation completed in {generation_time:.2f}s")
                 
                 return {
                     "success": True,
@@ -74,7 +74,7 @@ class OllamaInterface:
             else:
                 end_time = time.time()
                 generation_time = end_time - start_time
-                print(f"🔍 Ollama: Failed in {generation_time:.2f}s, status: {response.status_code}")
+                print(f"Ollama: Failed in {generation_time:.2f}s, status: {response.status_code}")
                 
                 return {
                     "success": False,
@@ -85,7 +85,7 @@ class OllamaInterface:
         except requests.exceptions.Timeout as e:
             end_time = time.time()
             generation_time = end_time - start_time
-            print(f"🔍 Ollama: TIMEOUT after {generation_time:.2f}s")
+            print(f"Ollama: TIMEOUT after {generation_time:.2f}s")
             
             return {
                 "success": False,
@@ -95,7 +95,7 @@ class OllamaInterface:
         except Exception as e:
             end_time = time.time()
             generation_time = end_time - start_time
-            print(f"🔍 Ollama: ERROR after {generation_time:.2f}s: {e}")
+            print(f"Ollama: ERROR after {generation_time:.2f}s: {e}")
             
             return {
                 "success": False,
@@ -186,7 +186,7 @@ def create_ollama_interface(model_name: str = "mistral") -> OllamaLLMInterface:
 
 if __name__ == "__main__":
     # Test Ollama interface
-    print("🧪 Testing Ollama Interface")
+    print("Testing Ollama Interface")
     
     try:
         interface = create_ollama_interface("mistral")
@@ -202,13 +202,13 @@ if __name__ == "__main__":
         result = interface.ollama.generate_response(test_prompt)
         
         if result["success"]:
-            print(f"✅ Response: {result['response']}")
-            print(f"📊 Tokens: {result['prompt_eval_count']} prompt, {result['eval_count']} response")
-            print(f"⏱️  Time: {result['response_time']:.2f}s")
+            print(f"Response: {result['response']}")
+            print(f"Tokens: {result['prompt_eval_count']} prompt, {result['eval_count']} response")
+            print(f"Time: {result['response_time']:.2f}s")
         else:
-            print(f"❌ Error: {result['error']}")
+            print(f"Error: {result['error']}")
             
     except Exception as e:
-        print(f"❌ Failed to test Ollama interface: {e}")
+        print(f"Failed to test Ollama interface: {e}")
         print("Make sure Ollama is running: ollama serve")
         print("And Mistral is downloaded: ollama pull mistral")

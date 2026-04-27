@@ -138,33 +138,33 @@ def validate_improvements(config: Dict[str, Any]) -> Dict[str, Any]:
     # Concern 1: Causal detection model usage
     causal_config = config.get("causal_detection", {})
     if causal_config.get("use_full_model", False):
-        validation_results["concerns_addressed"]["causal_model_usage"] = "✅ Full model enabled"
+        validation_results["concerns_addressed"]["causal_model_usage"] = "[PASS] Full model enabled"
     else:
-        validation_results["concerns_addressed"]["causal_model_usage"] = "⚠️ Using lightweight model only"
+        validation_results["concerns_addressed"]["causal_model_usage"] = "[WARN] Using lightweight model only"
         validation_results["recommendations"].append("Consider enabling full causal model for better accuracy")
     
     # Concern 2: Node limits
     max_nodes = config.get("limits", {}).get("max_graph_nodes", 500)
     if max_nodes >= 1000:
-        validation_results["concerns_addressed"]["node_limits"] = f"✅ Increased to {max_nodes} nodes"
+        validation_results["concerns_addressed"]["node_limits"] = f"[PASS] Increased to {max_nodes} nodes"
     elif max_nodes >= 500:
-        validation_results["concerns_addressed"]["node_limits"] = f"⚠️ Moderate: {max_nodes} nodes"
+        validation_results["concerns_addressed"]["node_limits"] = f"[WARN] Moderate: {max_nodes} nodes"
         validation_results["recommendations"].append("Consider increasing max_graph_nodes for better coverage")
     else:
-        validation_results["concerns_addressed"]["node_limits"] = f"❌ Low: {max_nodes} nodes"
+        validation_results["concerns_addressed"]["node_limits"] = f"[FAIL] Low: {max_nodes} nodes"
         validation_results["warnings"].append("Very low node limit may impact system effectiveness")
     
     # Concern 3: Question node comparison
     traversal_config = config.get("traversal", {})
     if traversal_config.get("explicit_question_comparison", False):
-        validation_results["concerns_addressed"]["question_comparison"] = "✅ Explicit comparison enabled"
+        validation_results["concerns_addressed"]["question_comparison"] = "[PASS] Explicit comparison enabled"
     else:
-        validation_results["concerns_addressed"]["question_comparison"] = "❌ No explicit comparison setting"
+        validation_results["concerns_addressed"]["question_comparison"] = "[FAIL] No explicit comparison setting"
         validation_results["recommendations"].append("Enable explicit_question_comparison for proper traversal")
     
     # Overall assessment
     total_concerns = len(validation_results["concerns_addressed"])
-    addressed_concerns = sum(1 for result in validation_results["concerns_addressed"].values() if "✅" in result)
+    addressed_concerns = sum(1 for result in validation_results["concerns_addressed"].values() if "[PASS]" in result)
     
     validation_results["overall_score"] = addressed_concerns / total_concerns
     validation_results["summary"] = f"{addressed_concerns}/{total_concerns} concerns properly addressed"
@@ -181,7 +181,7 @@ def demonstrate_improvements():
     research_config = create_high_performance_research_config()
     research_validation = validate_improvements(research_config)
     
-    print("🔬 RESEARCH CONFIGURATION:")
+    print("RESEARCH CONFIGURATION:")
     print(f"Max nodes: {research_config['limits']['max_graph_nodes']}")
     print(f"Full causal model: {research_config['causal_detection']['use_full_model']}")
     print(f"Explicit comparison: {research_config['traversal']['explicit_question_comparison']}")
@@ -192,7 +192,7 @@ def demonstrate_improvements():
     mobile_config = create_production_mobile_config()
     mobile_validation = validate_improvements(mobile_config)
     
-    print("📱 PRODUCTION MOBILE CONFIGURATION:")
+    print("PRODUCTION MOBILE CONFIGURATION:")
     print(f"Max nodes: {mobile_config['limits']['max_graph_nodes']}")
     print(f"Full causal model: {mobile_config['causal_detection']['use_full_model']}")
     print(f"Explicit comparison: {mobile_config['traversal']['explicit_question_comparison']}")
@@ -203,19 +203,19 @@ def demonstrate_improvements():
     adaptive_config = get_improved_config(device_memory_mb=3072, has_gpu=True)
     adaptive_validation = validate_improvements(adaptive_config)
     
-    print("🔄 ADAPTIVE CONFIGURATION (3GB device):")
+    print("ADAPTIVE CONFIGURATION (3GB device):")
     print(f"Max nodes: {adaptive_config['limits']['max_graph_nodes']}")
     print(f"Full causal model: {adaptive_config['causal_detection']['use_full_model']}")
     print(f"Explicit comparison: {adaptive_config['traversal']['explicit_question_comparison']}")
     print(f"Validation: {adaptive_validation['summary']}")
     
     if mobile_validation["recommendations"]:
-        print(f"\n📋 RECOMMENDATIONS:")
+        print(f"\nRECOMMENDATIONS:")
         for rec in mobile_validation["recommendations"]:
             print(f"  • {rec}")
     
     if mobile_validation["warnings"]:
-        print(f"\n⚠️ WARNINGS:")
+        print(f"\nWARNINGS:")
         for warning in mobile_validation["warnings"]:
             print(f"  • {warning}")
 

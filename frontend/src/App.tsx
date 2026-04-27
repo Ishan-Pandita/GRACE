@@ -397,7 +397,7 @@ const App: React.FC = () => {
                 const meta = STAGE_META[s!];
                 return (
                   <div key={s} className={`stg ${done ? 'done' : ''} ${act ? 'act' : ''}`}>
-                    <div className="stg-icon">{done ? '✓' : act ? meta.icon : ''}</div>
+                    <div className="stg-icon">{done ? '\u2713' : act ? meta.icon : ''}</div>
                     <span>{meta.label}</span>
                   </div>
                 );

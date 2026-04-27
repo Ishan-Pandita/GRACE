@@ -309,11 +309,11 @@ class CausalModelTrainer:
                     }
                     examples.append(formatted_example)
             
-            print(f"✅ Loaded {len(examples)} e-CARE examples")
+            print(f"Loaded {len(examples)} e-CARE examples")
             return examples
             
         except Exception as e:
-            print(f"❌ Error loading e-CARE: {e}")
+            print(f"Error loading e-CARE: {e}")
             return []
     
     def _load_copa_data(self) -> List[Dict[str, Any]]:
@@ -335,11 +335,11 @@ class CausalModelTrainer:
                     }
                     examples.append(formatted_example)
             
-            print(f"✅ Loaded {len(examples)} COPA examples")
+            print(f"Loaded {len(examples)} COPA examples")
             return examples
             
         except Exception as e:
-            print(f"❌ Error loading COPA: {e}")
+            print(f"Error loading COPA: {e}")
             return []
     
     def _create_balanced_ecare_copa_dataset(self, ecare_examples: List[Dict[str, Any]], 
@@ -376,7 +376,7 @@ class CausalModelTrainer:
         # Shuffle
         np.random.shuffle(combined_examples)
         
-        print(f"✅ Created balanced dataset:")
+        print(f"Created balanced dataset:")
         print(f"   e-CARE: {len(ecare_sample)} examples")
         print(f"   COPA: {len(copa_sample)} examples")
         print(f"   Total: {len(combined_examples)} examples")
@@ -530,23 +530,23 @@ def create_domain_specific_data() -> List[Dict[str, Any]]:
 
 def train_custom_causal_model():
     """Main function to train custom causal model with e-CARE + COPA datasets."""
-    print("🚀 Training Custom Causality Detection Model with e-CARE + COPA")
+    print("Training Custom Causality Detection Model with e-CARE + COPA")
     
     # Step 1: Initialize trainer with best model
-    print("🏋️ Step 1: Initializing trainer with FacebookAI/roberta-large-mnli...")
+    print("Step 1: Initializing trainer with FacebookAI/roberta-large-mnli...")
     trainer = CausalModelTrainer("FacebookAI/roberta-large-mnli")
     
     # Step 2: Load e-CARE and COPA datasets
-    print("📊 Step 2: Loading e-CARE and COPA datasets...")
+    print("Step 2: Loading e-CARE and COPA datasets...")
     ecare_examples = trainer._load_ecare_data()
     copa_examples = trainer._load_copa_data()
     
     if not ecare_examples and not copa_examples:
-        print("⚠️ Failed to load datasets. Using synthetic data.")
+        print("Failed to load datasets. Using synthetic data.")
         training_examples = trainer._create_synthetic_dataset()
     else:
         # Step 3: Create balanced dataset (70% e-CARE, 30% COPA)
-        print("📝 Step 3: Creating balanced dataset (70% e-CARE, 30% COPA)...")
+        print("Step 3: Creating balanced dataset (70% e-CARE, 30% COPA)...")
         training_examples = trainer._create_balanced_ecare_copa_dataset(ecare_examples, copa_examples)
 
     print(f"   Total training examples: {len(training_examples)}")
@@ -555,21 +555,21 @@ def train_custom_causal_model():
     train_dataset, test_dataset = trainer.prepare_data(training_examples)
 
     # Step 5: Train model
-    print("🏋️ Step 4: Training model...")
+    print("Step 4: Training model...")
     trained_trainer = trainer.train_model(train_dataset, test_dataset, "./custom_causal_model", num_epochs=3)
     
     # Step 6: Evaluate model
-    print("📈 Step 5: Evaluating model...")
+    print("Step 5: Evaluating model...")
     results = trainer.evaluate_model(test_dataset)
     
-    print("✅ Training complete!")
+    print("Training complete!")
     print(f"   Accuracy: {results['eval_accuracy']:.4f}")
     print(f"   F1 Score: {results['eval_f1']:.4f}")
     print(f"   Precision: {results['eval_precision']:.4f}")
     print(f"   Recall: {results['eval_recall']:.4f}")
     
     # Step 7: Test with examples
-    print("\n🧪 Step 6: Testing with real examples:")
+    print("\nStep 6: Testing with real examples:")
     test_cases = [
         ("The heavy rain caused the streets to flood", "Traffic was disrupted"),
         ("The user asked about climate change", "The system provided information"),

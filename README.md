@@ -95,11 +95,11 @@ This system is designed for scenarios where LLMs run locally on devices with **l
 |-------|----------------|---------|----------|
 | BGE-Small | `BAAI/bge-small-en-v1.5` | `graph_manager.py`, `prompt_processor.py` | Sentence embeddings for the web app pipeline |
 | BGE-Large | `BAAI/bge-large-en-v1.5` | `main.py` | Sentence embeddings for the evaluation pipeline |
-| BGE-Base | `BAAI/bge-base-en-v1.5` | `main.py` | ⬆️ Fallback for BGE-Large if it fails to load |
+| BGE-Base | `BAAI/bge-base-en-v1.5` | `main.py` | Fallback for BGE-Large if it fails to load |
 | BGE-Reranker | `BAAI/bge-reranker-base` | `main.py` | Cross-encoder reranking of candidate nodes |
 | RoBERTa-MNLI | `FacebookAI/roberta-large-mnli` | `causal_detection.py`, `temporal_reasoning.py` | Causal edge classification + temporal NLI |
-| DeBERTa-v3-Large | `microsoft/deberta-v3-large` | `temporal_reasoning.py` | ⬆️ Alternative temporal model (can replace RoBERTa-MNLI) |
-| DistilRoBERTa | `distilroberta-base` | `enhanced_causal_reasoner.py` | ⬆️ Lightweight fallback for causal detection if full model fails |
+| DeBERTa-v3-Large | `microsoft/deberta-v3-large` | `temporal_reasoning.py` | Alternative temporal model (can replace RoBERTa-MNLI) |
+| DistilRoBERTa | `distilroberta-base` | `enhanced_causal_reasoner.py` | Lightweight fallback for causal detection if full model fails |
 | DeBERTa-v3 QA | `microsoft/deberta-v3-base-squad2` | `main.py` | Extractive question answering |
 | DeBERTa-v3 NLI | `cross-encoder/nli-deberta-v3-base` | `main.py` | Entailment verification of extracted answers |
 | FLAN-T5 | `google/flan-t5-base` | `main.py` | Answer rewriting and reformulation |
@@ -241,7 +241,7 @@ python app.py
 You will see:
 ```
 ==================================================
-🚀 App starting at http://localhost:8000
+App starting at http://localhost:8000
 ==================================================
 ```
 

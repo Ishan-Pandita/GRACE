@@ -93,7 +93,7 @@ class RelevanceEngine:
         
         # Only log if we found meaningful results
         if len(relevant_nodes) > 0 or len(graph.nodes) > 0:
-            print(f"🔍 BFS: Graph has {len(graph.nodes)} nodes, found {len(relevant_nodes)} relevant nodes")
+            print(f"BFS: Graph has {len(graph.nodes)} nodes, found {len(relevant_nodes)} relevant nodes")
         
         # Sort by relevance score (descending)
         relevant_nodes.sort(key=lambda x: x["relevance_score"], reverse=True)

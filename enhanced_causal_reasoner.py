@@ -318,7 +318,7 @@ class EnhancedCausalReasoner:
         """Load lightweight model."""
         # Only load if causal detection is enabled
         if not self.use_full_model:
-            print("🔍 Causal detection disabled - skipping lightweight model loading")
+            print("Causal detection disabled - skipping lightweight model loading")
             self._lightweight_model = None
             self._lightweight_tokenizer = None
             return
